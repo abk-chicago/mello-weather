@@ -13,4 +13,25 @@
     tools:context="org.codeforcoffee.melloweather.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/view">
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/locationEditText"
+            android:singleLine="true"
+            android:hint="@string/hint_text"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/weatherListView"/>
+
+
 </LinearLayout>
