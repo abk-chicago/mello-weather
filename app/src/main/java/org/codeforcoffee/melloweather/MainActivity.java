@@ -1,10 +1,12 @@
 package org.codeforcoffee.melloweather;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.util.AsyncListUtil;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
@@ -13,6 +15,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -39,6 +49,66 @@ public class MainActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    private void convertJSONtoArrayList(JSONObject forcast) {
+        mWeatherList.clear();
+        try {
+            JSONArray list = forcast.getJSONArray("list");
+            for (int inc = 0; inc < list.length(); ++inc) {
+                JSONObject day = list.getJSONObject(inc);
+                JSONObject temp = day.getJSONObject("temp");
+                JSONObject weather = day.getJSONArray("weather").getJSONObject(0);
+                mWeatherList.add(new Weather(
+                    day.getLong("dt"),
+                        temp.getDouble("min"),
+                        temp.getDouble("max"),
+                        day.getDouble("humidity"),
+                        weather.getString("description"),
+                        weather.getString("icon")
+                ));
+            }
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private class GetWeatherTask extends AsyncTask<URL, Void, JSONObject> {
+        @Override
+        protected JSONObject doInBackground(URL... params) {
+            HttpURLConnection http = null;
+            try {
+                http = (HttpURLConnection) params[0].openConnection();
+                int response = http.getResponseCode();
+                if (response == HttpURLConnection.HTTP_OK) {
+                   StringBuilder sb = new StringBuilder();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(http.getInputStream()))) {
+                        String l;
+                        while ((l = reader.readLine()) != null) {
+                            sb.append(l);
+                        }
+                    } catch (IOException ex) {
+                        Snackbar.make(findViewById(R.id.coordinator_layout), R.string.err_reading, Snackbar.LENGTH_LONG).show();
+                        ex.printStackTrace();
+                    }
+                    return new JSONObject(sb.toString());
+                } else {
+                    Snackbar.make(findViewById(R.id.coordinator_layout), R.string.err_connection, Snackbar.LENGTH_LONG).show();
+                }
+            } catch (Exception ex) {
+                Snackbar.make(findViewById(R.id.coordinator_layout), R.string.err_connection, Snackbar.LENGTH_LONG).show();
+                ex.printStackTrace();
+            } finally {
+                http.disconnect();
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(JSONObject weather) {
+            convertJSONtoArrayList(weather);
+            mWeatherArrayAdapter.notifyDataSetChanged();
+            mWeatherListView.smoothScrollToPosition(0);
+        }
     }
 
     @Override
