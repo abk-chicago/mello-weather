@@ -51,10 +51,10 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    private void convertJSONtoArrayList(JSONObject forcast) {
+    private void convertJSONtoArrayList(JSONObject forecast) {
         mWeatherList.clear();
         try {
-            JSONArray list = forcast.getJSONArray("list");
+            JSONArray list = forecast.getJSONArray("list");
             for (int inc = 0; inc < list.length(); ++inc) {
                 JSONObject day = list.getJSONObject(inc);
                 JSONObject temp = day.getJSONObject("temp");
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (JSONException ex) {
             ex.printStackTrace();
+            Snackbar.make(findViewById(R.id.coordinator_layout), R.string.err_forecast_missing, Snackbar.LENGTH_LONG).show();
         }
     }
 

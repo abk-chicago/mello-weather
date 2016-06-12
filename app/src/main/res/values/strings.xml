@@ -12,4 +12,5 @@
     <string name="hint_text">Enter city (e.g, Chicago, IL, US)</string>
     <string name="err_reading">Unable to read weather data</string>
     <string name="err_connection">Unable to connect to OpenWeatherMap.org</string>
+    <string name="err_forecast_missing">Unable to find forecast for this location</string>
 </resources>
