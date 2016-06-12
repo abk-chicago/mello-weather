@@ -1,5 +1,6 @@
 package org.codeforcoffee.melloweather;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,8 +9,37 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private List<Weather> mWeatherList = new ArrayList<>();
+    private WeatherArrayAdapter mWeatherArrayAdapter;
+    private ListView mWeatherListView;
+
+    private void dismissKeyboard(View v) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+    private URL createURL(String city) {
+        String apiKey = getString(R.string.api_key);
+        String baseUrl = getString(R.string.url_openweather_api);
+        try {
+            String url = baseUrl + URLEncoder.encode(city, "UTF-8") + "&units=imperial&cnt=16&APPID=" + apiKey;
+            return new URL(url);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,12 +48,26 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mWeatherListView = (ListView) findViewById(R.id.weatherListView);
+        mWeatherArrayAdapter = new WeatherArrayAdapter(this, mWeatherList);
+        mWeatherListView.setAdapter(mWeatherArrayAdapter);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                EditText locationEditText = (EditText) findViewById(R.id.locationEditText);
+                URL url = createURL(locationEditText.getText().toString());
+
+                if (url != null) {
+                    dismissKeyboard(locationEditText);
+                    GetWeatherTask getLocalWeatherTask = new GetWeatherTask();
+                    getLocalWeatherTask.execute(url);
+                } else {
+                    Snackbar.make(findViewById(R.id.coordinator_layout), R.string.url_invalid, Snackbar.LENGTH_LONG)
+                            .show();
+                }
+
             }
         });
     }
