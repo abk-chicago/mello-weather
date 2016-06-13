@@ -1,6 +1,7 @@
 package org.codeforcoffee.melloweather;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private List<Weather> mWeatherList = new ArrayList<>();
     private WeatherArrayAdapter mWeatherArrayAdapter;
     private ListView mWeatherListView;
+
+    private Intent mSettingsIntent;
 
     private void dismissKeyboard(View v) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -159,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            mSettingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(mSettingsIntent);
             return true;
         }
 
